@@ -1,20 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Audio and Canvas Sketches</title>
+  <style>
+    #canvas {
+      width: 100px;
+      height: 100px;
+      margin-left: 0;
+      margin-right: 0;
+      background-size: 210px 193px;
+      background-image: url("https://");
+      background-position: 16.8359px 16.8359px;
+      background-repeat: no-repeat;
+    }
+  </style>
+  <style>
+    #content {
+    }
+  </style>
 </head>
+
 <body>
-<div id="content" content="width=device-width, initial-scale=1.0, height=device-height">
-<img id="question" src="" alt="Question Downloading"/>
-<audio id="audio" controls>
-  <source src="https://cozum.dijitalokul.com/uploads/assets/solution/cozum_15404_09_26_2019_10_02_05.mp3" type="audio/mp3">
-  Your browser does not support the audio element.
-</audio>
-<canvas id="canvas" width="1024" height="565"></canvas>
-<!-- Link to the external JavaScript file -->
-</div>
-<script src="script.js"></script>
+
+
+  <div id="content" class="title" width="300" height="200">
+    <canvas id="canvas" class="style-canvas" width="431" height="237.8076171875"></canvas>
+  </div>
+
+  <div id="media" width="100" height="50">
+    <audio id="audio" controls>
+      <source src="test/mp3.mp3" type="audio/mp3">
+      Your browser does not support the audio element.
+    </audio>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script type="module" src="script.js"></script>
+
 </body>
+
 </html>
