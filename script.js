@@ -340,24 +340,3 @@ audio.addEventListener('pause', () => {
 audio.addEventListener('seeked', () => {
     updateCanvas();
 });
-
-
-/*
-function pdf2jpg(pdfUrl) {
-    pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
-        pdf.getPage(1).then(page => {
-            const viewport = page.getViewport({ scale: 1 });
-            const renderContext = {
-                canvasContext: ctx,
-                viewport: viewport,
-                width:
-            };
-            page.render(renderContext).promise.then(() => {
-                console.log('PDF page rendered');
-            });
-        });
-    });
-}
-*/
-
-
