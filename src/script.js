@@ -220,3 +220,4 @@ audio.addEventListener('pause', () => {
 audio.addEventListener('seeked', () => {
     updateCanvas();
 });
+
