@@ -29,146 +29,33 @@ class Point {
     }
 }
 let objects = [];
-
-const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-let pdf_url = 'https://cozum.dijitalokul.com/uploads/assets/questions/12189/ddb1d75c50a026b522d6a0ad291c6aec.pdf';
-let swf_url = 'https://cozum.dijitalokul.com/uploads/assets/questions/12189/ddb1d75c50a026b522d6a0ad291c6aec.swf';
-let xaml_url = 'https://cozum.dijitalokul.com/uploads/assets/solution/cozum_15404_09_26_2019_10_02_05.xaml';
-
-let imageSrc ='';
-let xamlString='';
-let swfWidth = 0;
-let swfHeight = 0;
-
+let csvRows = [];
+let imageSrc;
+let xamlString;
+let swfWidth;
+let swfHeight;
 let xamlInfo;
 let scale;
-
-const updateInterval = 10;
 let intervalId;
+const updateInterval = 10;
+
+let question = 13;
+let csv_file = "player_infos.csv";
 
 
 //Initialization Parts
-async function getImageSrc(pdfUrl) {
-    const requestUrl = 'https://cozum.dijitalokul.com/soru_cozum/web_player/pdf2jpg.php';
-    const params = new URLSearchParams({
-        action: 'pdf2jpg',
-        url: pdfUrl,
-        x: 1,
-        y: 1
-    });
-
-    try {
-        const response = await fetch(`${requestUrl}?${params}`, {
-            method: 'GET',
-            referrerPolicy: 'strict-origin-when-cross-origin'
-        });
-
-        if (!response.ok) {
-            throw new Error('Network response was not ok ' + response.statusText);
-        }
-
-        imageSrc = await response.text();
-    }
-    catch (error) {
-        console.error('There was a problem with the fetch operation:', error);
-    }
+async function getFromCsv(filePath) {
+    let response = await fetch(filePath);
+    response = await response.text();
+    return response.split('\n').map(row => row.split(','))
 }
 
-async function decodeXAML(xamlUrl){
-
-    function base64ToString(_xmlString, _keyString) {
-
-        let _strings = _xmlString.split("");
-
-        let _keys = _keyString.split("|");
-        _strings.splice(_keys[0], 1);
-        _strings.splice(_keys[1], 1);
-        return decode64(_strings.join(""));
-    }
-
-    function decode64(input) {
-
-        let keyStr = "ABCDEFGHIJKLMNOP" +
-            "QRSTUVWXYZabcdef" +
-            "ghijklmnopqrstuv" +
-            "wxyz0123456789+/" +
-            "=";
-        let output = "";
-        let chr1, chr2, chr3 = "";
-        let enc1, enc2, enc3, enc4 = "";
-        let i = 0;
-
-        // remove all characters that are not A-Z, a-z, 0-9, +, /, or =
-        let base64test = /[^A-Za-z0-9\+\/\=]/g;
-        if (base64test.exec(input)) {
-            alert("There were invalid base64 characters in the input text.\n" +
-                "Valid base64 characters are A-Z, a-z, 0-9, '+', '/',and '='\n" +
-                "Expect errors in decoding.");
-        }
-        input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
-
-        do {
-            enc1 = keyStr.indexOf(input.charAt(i++));
-            enc2 = keyStr.indexOf(input.charAt(i++));
-            enc3 = keyStr.indexOf(input.charAt(i++));
-            enc4 = keyStr.indexOf(input.charAt(i++));
-
-            chr1 = (enc1 << 2) | (enc2 >> 4);
-            chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
-            chr3 = ((enc3 & 3) << 6) | enc4;
-
-            output = output + String.fromCharCode(chr1);
-
-            if (enc3 != 64) {
-                output = output + String.fromCharCode(chr2);
-            }
-            if (enc4 != 64) {
-                output = output + String.fromCharCode(chr3);
-            }
-
-            chr1 = chr2 = chr3 = "";
-            enc1 = enc2 = enc3 = enc4 = "";
-
-        } while (i < input.length);
-
-        return decodeURI(output);
-    }
-
-    let xamlText = await fetch(proxyUrl+xaml_url)
-      .then(response => {
-          if (!response.ok) {
-              throw new Error('Network response was not ok');
-          }
-          return response.text();
-      });
-
-    let _cryptKey = "10|20";
-    xamlString = base64ToString(xamlText, _cryptKey);
-}
-
-async function getSwfInfo(swfUrl){
-    const requestUrl = 'https://cozum.dijitalokul.com/soru_cozum/web_player/get-size.php';
-    const params = new URLSearchParams({
-        action: 'get-size',
-        url: swfUrl
-    });
-
-    try{
-        const response = await fetch(`${requestUrl}?${params}`, {
-            method: 'GET',
-            referrerPolicy: 'strict-origin-when-cross-origin'
-        });
-        if (!response.ok) {
-            throw new Error('Network response was not ok ' + response.statusText);
-        }
-
-        const sizes = await response.json();
-        swfWidth = sizes["0"];
-        swfHeight = sizes["1"];
-    }
-    catch (error) {
-        console.error('There was a problem with the fetch operation:', error);
-    }
+function setDatas(questionIndex) {
+    imageSrc = csvRows[questionIndex][1];
+    swfWidth = csvRows[questionIndex][2];
+    swfHeight = csvRows[questionIndex][3];
+    xamlString = csvRows[questionIndex][4];
+    audio.src = "mp3output/"+csvRows[questionIndex][0]+".mp3";
 }
 
 function getXamlInfo(xamlFile) {
@@ -229,7 +116,7 @@ function resizeCanvas (){
 function getObjects(xamlString) {
 
     function extractAttributeValue(element, attributeName, defaultValue) {
-        const pattern = new RegExp(`${attributeName}="(.*?)"`);
+        const pattern = new RegExp(`${attributeName}="\"\""(.*?)"`);
         let match = element.match(pattern);
         return match ? match[1] : defaultValue;
     }
@@ -245,8 +132,16 @@ function getObjects(xamlString) {
 
         const points = poMatches.map(poMatch => poMatch[1]);
 
-        let t1 = parseFloat(extractAttributeValue(objMatch[0], "t1", "0"));
-        let t2 = parseFloat(extractAttributeValue(objMatch[0], "t2", "0"));
+        var regex = /t1=""([^""]+)"" t2=""([^""]+)""/;
+        let match = objMatch[0].match(regex);
+        let t1;
+        let t2;
+        if (match) {
+            t1 = match[1];
+            t2 = match[2];
+        }
+        //let t1 = parseFloat(extractAttributeValue(objMatch[0], "t1", "0"));
+        //let t2 = parseFloat(extractAttributeValue(objMatch[0], "t2", "0"));
         let colorValue = extractAttributeValue(objMatch[0], "color", "12597547");
         let colorInt = parseInt(colorValue, 10);
         let lineColor = {
@@ -262,6 +157,7 @@ function getObjects(xamlString) {
         pointlist.forEach(point => pointler.push(new Point(point[0],point[1])));
         objects.push(new DrawingObject(pointler,t1/1000,t2/1000,lineColor));
     });
+    console.log(objects);
 }
 
 
@@ -297,9 +193,8 @@ function updateCanvas() {
 
 
 async function Initialize(){
-    await decodeXAML(xaml_url);
-    await getSwfInfo(swf_url);
-    await getImageSrc(pdf_url);
+    csvRows = await getFromCsv(csv_file);
+    setDatas(question);
     getXamlInfo(xamlString);
     resizeCanvas();
     getObjects(xamlString);
