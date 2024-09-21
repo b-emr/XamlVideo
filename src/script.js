@@ -39,7 +39,7 @@ let scale;
 let intervalId;
 const updateInterval = 10;
 
-let question = 13;
+let question = 11;
 let csv_file = "player_infos.csv";
 
 
@@ -109,6 +109,7 @@ function resizeCanvas (){
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
 
+    audio.style.width = viewportWidth-50 + 'px';
     $("#content").css('height', canvasHeight);
     $("#content").css('margin-top', ($(window).height() - $('#player').height()-canvasHeight) / 2);
 }
