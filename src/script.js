@@ -96,9 +96,10 @@ function resizeCanvas (){
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
 
-    audio.style.width = viewportWidth-50 + 'px';
-    $("#content").css('height', canvasHeight);
-    $("#content").css('margin-top', ($(window).height() - $('#player').height()-canvasHeight) / 2);
+    audio.style.width = viewportWidth-100 + 'px';
+    $("#canvas").css('height', canvasHeight);
+    $("#canvas").css('margin-top', ($(window).height() - $('#media').height()-canvasHeight) / 2);
+    $("#canvas").css('margin-left', ($(window).width() - $('#media').width()) / 2);
 }
 
 function getObjects(xamlString) {
@@ -241,3 +242,35 @@ audio.addEventListener('seeked', () => {
     updateCanvas();
 });
 
+
+const fullscreenBtn = document.getElementById('fullscreenBtn');
+
+fullscreenBtn.addEventListener('click', () => {
+    if (!document.fullscreenElement) {
+        if (content.requestFullscreen) {
+            content.requestFullscreen();
+        } else if (content.mozRequestFullScreen) { // Firefox
+            content.mozRequestFullScreen();
+        } else if (content.webkitRequestFullscreen) { // Chrome, Safari and Opera
+            content.webkitRequestFullscreen();
+        } else if (content.msRequestFullscreen) { // IE/Edge
+            content.msRequestFullscreen();
+        }
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+    }
+});
+
+// Keep canvas centered and media player at the bottom on fullscreen
+document.addEventListener('fullscreenchange', () => {
+    if (document.fullscreenElement) {
+        content.style.width = '100vw';
+        content.style.height = '100vh';
+        media.style.bottom = '0';  // Keep the media player at the bottom
+    } else {
+        content.style.width = 'auto';
+        content.style.height = 'auto';
+    }
+});
