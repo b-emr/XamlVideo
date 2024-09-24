@@ -12,12 +12,14 @@ class DrawingObject {
     t1;
     t2;
     color;
+    thc;
 
-    constructor(points, t1, t2, color) {
+    constructor(points, t1, t2, color, thc) {
         this.points = points;
         this.t1 = t1;
         this.t2 = t2;
         this.color = color;
+        this.thc = thc;
     }
 }
 class Point {
@@ -28,8 +30,8 @@ class Point {
         this.y = y;
     }
 }
+
 let objects = [];
-let csvRows = [];
 let imageSrc;
 let xamlString;
 let swfWidth;
@@ -38,26 +40,11 @@ let xamlInfo;
 let scale;
 let intervalId;
 const updateInterval = 10;
+let params = new URLSearchParams(window.location.search);
 
-let question = 11;
-let csv_file = "player_infos.csv";
 
 
 //Initialization Parts
-async function getFromCsv(filePath) {
-    let response = await fetch(filePath);
-    response = await response.text();
-    return response.split('\n').map(row => row.split(','))
-}
-
-function setDatas(questionIndex) {
-    imageSrc = csvRows[questionIndex][1];
-    swfWidth = csvRows[questionIndex][2];
-    swfHeight = csvRows[questionIndex][3];
-    xamlString = csvRows[questionIndex][4];
-    audio.src = "mp3output/"+csvRows[questionIndex][0]+".mp3";
-}
-
 function getXamlInfo(xamlFile) {
     const pattern = /<info[^>]*>([^<]+)<\/info>/i;
 
@@ -117,7 +104,7 @@ function resizeCanvas (){
 function getObjects(xamlString) {
 
     function extractAttributeValue(element, attributeName, defaultValue) {
-        const pattern = new RegExp(`${attributeName}="\"\""(.*?)"`);
+        const pattern = new RegExp(`${attributeName}="(.*?)"`);
         let match = element.match(pattern);
         return match ? match[1] : defaultValue;
     }
@@ -133,34 +120,74 @@ function getObjects(xamlString) {
 
         const points = poMatches.map(poMatch => poMatch[1]);
 
-        var regex = /t1=""([^""]+)"" t2=""([^""]+)""/;
-        let match = objMatch[0].match(regex);
+        const regex = /t1=(\d+)\s+t2=(\d+)/;
+        const colorRegex = /color=(\d+)/;
+        const thicknessRegex = /thc=(\d+)/;
+
+        let thickness;
+        const matchThickness = objMatch[0].match(thicknessRegex);
+        if (matchThickness) {
+            thickness = matchThickness[1];
+        }
+        thickness = parseInt(thickness);
+        const matchTime = objMatch[0].match(regex);
         let t1;
         let t2;
-        if (match) {
-            t1 = match[1];
-            t2 = match[2];
+        if (matchTime) {
+            t1 = matchTime[1];
+            t2 = matchTime[2];
         }
-        //let t1 = parseFloat(extractAttributeValue(objMatch[0], "t1", "0"));
-        //let t2 = parseFloat(extractAttributeValue(objMatch[0], "t2", "0"));
-        let colorValue = extractAttributeValue(objMatch[0], "color", "12597547");
+        let colorValue;
+        const matchColor = objMatch[0].match(colorRegex);
+        if(matchColor) {
+            colorValue = matchColor[1];
+        }
         let colorInt = parseInt(colorValue, 10);
         let lineColor = {
             r: (colorInt >> 16) & 0xFF,
             g: (colorInt >> 8) & 0xFF,
             b: colorInt & 0xFF
         };
-
-        const pointlist = points.map(x => x.split("|"));
-        pointlist.map(x => x[0] = x[0] * scale);
-        pointlist.map(y => y[1] = y[1] * scale);
-        let pointler = [];
-        pointlist.forEach(point => pointler.push(new Point(point[0],point[1])));
-        objects.push(new DrawingObject(pointler,t1/1000,t2/1000,lineColor));
+        const pointList = points.map(x => x.split("|"));
+        pointList.map(x => x[0] = x[0] * scale);
+        pointList.map(y => y[1] = y[1] * scale);
+        let pointData = [];
+        pointList.forEach(point => pointData.push(new Point(point[0],point[1])));
+        objects.push(new DrawingObject(pointData,t1/1000,t2/1000,lineColor,thickness));
     });
     console.log(objects);
 }
 
+function getIdFromUrl() {
+    return parseInt(params.get("id"));
+}
+
+async function getData(id) {
+    const apiURL = 'http://xamlvideo.pakodemy.com/api/question/' + id.toString();
+
+    let response = await fetch(apiURL);
+
+    return response.json();
+}
+
+async function initV2() {
+    let questionId = getIdFromUrl();
+    let response = await getData(questionId);
+    console.log(response);
+    imageSrc = response["imageUrl"];
+    swfWidth = response["imageWidth"];
+    swfHeight = response["imageHeight"];
+    xamlString = response["xaml"];
+    audio.src = "mp3output/"+response["id"]+".mp3";
+    console.log(xamlString);
+    canvasInit();
+}
+
+function canvasInit(){
+    getXamlInfo(xamlString);
+    resizeCanvas();
+    getObjects(xamlString);
+}
 
 //Canvas Parts:
 function updateCanvas() {
@@ -171,7 +198,7 @@ function updateCanvas() {
         let object = objects[i];
         let delay = object.t2/object.points.length;
         let color = `rgb(${object.color.r}, ${object.color.g}, ${object.color.b})`;
-
+        console.log("color: ",color);
         ctx.beginPath();
 
         for (let j = 0; j < object.points.length; j++) {
@@ -187,24 +214,16 @@ function updateCanvas() {
         }
 
         ctx.strokeStyle = color;
-        ctx.lineWidth = 2*scale;
+        ctx.lineWidth = object.thc*scale;
         ctx.stroke();
     }
 }
 
 
-async function Initialize(){
-    csvRows = await getFromCsv(csv_file);
-    setDatas(question);
-    getXamlInfo(xamlString);
-    resizeCanvas();
-    getObjects(xamlString);
-}
-
-await Initialize();
+await initV2();
 
 window.addEventListener('resize', async function() {
-    await Initialize();
+    await canvasInit();
     updateCanvas();
 });
 
