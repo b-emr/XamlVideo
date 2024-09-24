@@ -1,6 +1,7 @@
 const audio = document.getElementById('audio');
 const canvas = document.getElementById('canvas');
 const content = document.getElementById('content');
+const fullscreenBtn = document.getElementById('fullscreenBtn');
 const media = document.getElementById('media');
 const ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = true;
@@ -105,7 +106,7 @@ function resizeCanvas (){
 function getObjects(xamlString) {
 
     function extractAttributeValue(element, attributeName, defaultValue) {
-        const pattern = new RegExp(`${attributeName}="(.*?)"`);
+        const pattern = new RegExp(`${attributeName}=(.*?)\\s`);
         let match = element.match(pattern);
         return match ? match[1] : defaultValue;
     }
@@ -121,8 +122,6 @@ function getObjects(xamlString) {
 
         const points = poMatches.map(poMatch => poMatch[1]);
 
-        const regex = /t1=(\d+)\s+t2=(\d+)/;
-        const colorRegex = /color=(\d+)/;
         const thicknessRegex = /thc=(\d+)/;
 
         let thickness;
@@ -131,24 +130,16 @@ function getObjects(xamlString) {
             thickness = matchThickness[1];
         }
         thickness = parseInt(thickness);
-        const matchTime = objMatch[0].match(regex);
-        let t1;
-        let t2;
-        if (matchTime) {
-            t1 = matchTime[1];
-            t2 = matchTime[2];
-        }
-        let colorValue;
-        const matchColor = objMatch[0].match(colorRegex);
-        if(matchColor) {
-            colorValue = matchColor[1];
-        }
+        let t1 = extractAttributeValue(objMatch[0],"t1",0);
+        let t2 = extractAttributeValue(objMatch[0],"t2",0);
+        let colorValue = extractAttributeValue(objMatch[0],"color","12345678");
         let colorInt = parseInt(colorValue, 10);
         let lineColor = {
             r: (colorInt >> 16) & 0xFF,
             g: (colorInt >> 8) & 0xFF,
             b: colorInt & 0xFF
         };
+
         const pointList = points.map(x => x.split("|"));
         pointList.map(x => x[0] = x[0] * scale);
         pointList.map(y => y[1] = y[1] * scale);
@@ -174,7 +165,6 @@ async function getData(id) {
 async function initV2() {
     let questionId = getIdFromUrl();
     let response = await getData(questionId);
-    console.log(response);
     imageSrc = response["imageUrl"];
     swfWidth = response["imageWidth"];
     swfHeight = response["imageHeight"];
@@ -184,11 +174,6 @@ async function initV2() {
     canvasInit();
 }
 
-function canvasInit(){
-    getXamlInfo(xamlString);
-    resizeCanvas();
-    getObjects(xamlString);
-}
 
 //Canvas Parts:
 function updateCanvas() {
@@ -199,7 +184,6 @@ function updateCanvas() {
         let object = objects[i];
         let delay = object.t2/object.points.length;
         let color = `rgb(${object.color.r}, ${object.color.g}, ${object.color.b})`;
-        console.log("color: ",color);
         ctx.beginPath();
 
         for (let j = 0; j < object.points.length; j++) {
@@ -219,6 +203,13 @@ function updateCanvas() {
         ctx.stroke();
     }
 }
+
+function canvasInit(){
+    getXamlInfo(xamlString);
+    resizeCanvas();
+    getObjects(xamlString);
+}
+
 
 
 await initV2();
@@ -242,19 +233,10 @@ audio.addEventListener('seeked', () => {
     updateCanvas();
 });
 
-
-const fullscreenBtn = document.getElementById('fullscreenBtn');
-
 fullscreenBtn.addEventListener('click', () => {
     if (!document.fullscreenElement) {
         if (content.requestFullscreen) {
             content.requestFullscreen();
-        } else if (content.mozRequestFullScreen) { // Firefox
-            content.mozRequestFullScreen();
-        } else if (content.webkitRequestFullscreen) { // Chrome, Safari and Opera
-            content.webkitRequestFullscreen();
-        } else if (content.msRequestFullscreen) { // IE/Edge
-            content.msRequestFullscreen();
         }
     } else {
         if (document.exitFullscreen) {
@@ -263,12 +245,11 @@ fullscreenBtn.addEventListener('click', () => {
     }
 });
 
-// Keep canvas centered and media player at the bottom on fullscreen
 document.addEventListener('fullscreenchange', () => {
     if (document.fullscreenElement) {
         content.style.width = '100vw';
         content.style.height = '100vh';
-        media.style.bottom = '0';  // Keep the media player at the bottom
+        media.style.bottom = '0';
     } else {
         content.style.width = 'auto';
         content.style.height = 'auto';
