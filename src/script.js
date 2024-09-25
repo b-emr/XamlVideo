@@ -91,7 +91,9 @@ function resizeCanvas (){
         "width": canvasWidth,
         "height": canvasHeight,
         'margin-left': canvasMarginX,
-        'margin-right': canvasMarginX
+        'margin-right': canvasMarginX,
+        'margin-top': canvasMarginY,
+        'margin-bottom': canvasMarginY
     });
 
     canvas.width = canvasWidth;

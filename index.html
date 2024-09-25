@@ -7,28 +7,12 @@
   <link href="https://cdn.prod.website-files.com/664c59a064bf50215c9b9779/6659c3074ca91bdac00d0c0e_p-icon-32-32.png" rel="shortcut icon" type="image/x-icon"/>
   <title>Pakodemy Xaml Video</title>
   <style>
-    #canvas {
-        width: 100px;
-        height: 100px;
-        margin-left: 0;
-        margin-right: 0;
-        background-color: white;
-        background-size: 100px 100px;
-        background-image: url("https://");
-        background-position: 10px 10px;
-        background-repeat: no-repeat;
-    }
-  </style>
-
-  <style>
-      /* Reset margin and padding */
       * {
           margin: 0;
           padding: 0;
           box-sizing: border-box;
+          background-color: white;
       }
-
-      /* Set the body to use the full viewport height */
       body, html {
           height: 100%;
           display: flex;
@@ -36,8 +20,17 @@
           align-items: center;
           background-color: white;
       }
-
-      /* Wrapper to hold the content */
+      #canvas {
+          width: 100px;
+          height: 100px;
+          margin-left: 0;
+          margin-right: 0;
+          background-color: white;
+          background-size: 100px 100px;
+          background-image: url("https://");
+          background-position: 10px 10px;
+          background-repeat: no-repeat;
+      }
       #content {
           display: flex;
           flex-direction: column;
@@ -46,8 +39,6 @@
           width: 100%;
           height: 100%;
       }
-
-      /* Style for the media player container */
       #media {
           position: absolute;
           bottom: 0;
@@ -57,14 +48,11 @@
           justify-content: center;
           align-items: center;
       }
-
       #media audio {
           width: 90%;
-          height: 10vh; /* Adjust the height to 10% of viewport height */
-          max-height: 70px; /* Cap the maximum height */
+          height: 10vh;
+          max-height: 70px;
       }
-
-      /* Style for the fullscreen button */
       #fullscreenBtn {
           width: 50px;
           height: 50px;
@@ -72,8 +60,8 @@
           color: white;
           border: none;
           cursor: pointer;
-          border-radius: 50%; /* Make the button round */
-          margin-left: 10px; /* Add space between the button and the audio player */
+          border-radius: 50%;
+          margin-left: 10px;
           margin-top: 15px;
           font-size: 30px;
           align-content: center;
