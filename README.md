@@ -5,9 +5,7 @@ XamlVideo is a WEB application that captures points drawn on a canvas and conver
 
 ## Table of Contents
 - [Features](#features)
-- [Installation](#installation)
 - [Usage](#usage)
-- [Contributing](#contributing)
 - [License](#license)
 
 ## Features
@@ -15,14 +13,14 @@ XamlVideo is a WEB application that captures points drawn on a canvas and conver
 - Synchronize drawings with background music (MP3 support)
 - Media player-like navigation controls
 - Works online
-
-## Installation
    
-### 6. **Usage**
+## Usage
 First declare a question Id that user wants to display. 
 Then run the Url: 'https://xamlvideo.pakodemy.com/index.html/?{questionId}.xaml'
 This Url contains a canvas and audio player that controls mp3 file and canvas skecthes.
 
+## License
+This project was designed by Bünyamin Emre Efe for the [Pakodemy] application developed by [TOS Analytics] company.
 
 ## Contact
 For any errors or bugs, please contact [Bünyamin Emre EFE](mailto:befe22@ku.edu.tr).
