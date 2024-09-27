@@ -153,7 +153,13 @@ function getObjects(xamlString) {
 }
 
 function getIdFromUrl() {
-    return parseInt(params.get("id"));
+    let full_string = params.get("id").toString()
+    let str_length = full_string.length;
+    let id_str = ""
+    for (let i = 0; i < str_length-5; i++) {
+        id_str += full_string[i]
+    }
+    return parseInt(id_str);
 }
 
 async function getData(id) {
@@ -166,6 +172,7 @@ async function getData(id) {
 
 async function initV2() {
     let questionId = getIdFromUrl();
+    console.log("QuestionId: ",questionId);
     let response = await getData(questionId);
     console.log(response);
     imageSrc = response["imageUrl"];
