@@ -167,6 +167,7 @@ async function getData(id) {
 async function initV2() {
     let questionId = getIdFromUrl();
     let response = await getData(questionId);
+    console.log(response);
     imageSrc = response["imageUrl"];
     swfWidth = response["imageWidth"];
     swfHeight = response["imageHeight"];
@@ -174,7 +175,11 @@ async function initV2() {
     let xamlResponse = await fetch(xamlUrl);
     xamlString = xamlResponse.text();
     audio.src = response["mp3Url"];
-    console.log(xamlString);
+    console.log("audio.src: ",audio.src)
+    console.log("image src: ",imageSrc)
+    console.log("xaml: ", xamlString);
+    console.log("imageWidth: ", swfWidth);
+    console.log("imageHeight: ", swfHeight);
     canvasInit();
 }
 
