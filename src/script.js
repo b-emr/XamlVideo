@@ -170,8 +170,10 @@ async function initV2() {
     imageSrc = response["imageUrl"];
     swfWidth = response["imageWidth"];
     swfHeight = response["imageHeight"];
-    xamlString = response["xaml"];
-    audio.src = "mp3output/"+response["id"]+".mp3";
+    let xamlUrl = response["xamlUrl"];
+    let xamlResponse = await fetch(xamlUrl);
+    xamlString = xamlResponse.text();
+    audio.src = response["mp3Url"];
     console.log(xamlString);
     canvasInit();
 }
