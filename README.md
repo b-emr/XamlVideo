@@ -16,7 +16,7 @@ XamlVideo is a WEB application that captures points drawn on a canvas and conver
    
 ## Usage
 -First declare a {question_id} that user wants to display. 
--Then run the Url: 'https://xamlvideo.pakodemy.com/index.html/?{question_id}.xaml'
+-Then run the Url: (https://xamlvideo.pakodemy.com/?id={question_id}.xaml)
 -This Url contains a canvas and audio player that controls mp3 file and canvas skecthes.
 
 ## License
